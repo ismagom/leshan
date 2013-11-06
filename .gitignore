@@ -4,3 +4,10 @@
 *.jar
 *.war
 *.ear
+
+.classpath
+.project
+target/
+run.sh
+.gitignore
+.gitignore~

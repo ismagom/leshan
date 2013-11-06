@@ -49,5 +49,29 @@ lwClientControllers.controller('ClientDetailCtrl', [ '$scope', '$location', '$an
 						}
 					});
 				};
+
+			$scope.exec = function(resource, idx) {
+				
+				// TODO read for full object
+				$http.post("/api/clients/" + $scope.clientId + "/" + resource)
+					.success(function(data, status, headers, config) {
+						if(data.status == "CHANGED") {
+							$scope.lwresources[idx].value = "OK";
+						} else {
+							$scope.lwresources[idx].value = "Error";
+						}
+					});
+				};
+			$scope.write = function(resource, idx) {
+				
+				// TODO read for full object
+				$http.put("/api/clients/" + $scope.clientId + "/" + resource)// + "/123")
+					.success(function(data, status, headers, config) {
+						//alert(JSON.stringify(data));
+						if(data.status = "CONTENT") {
+							$scope.lwresources[idx].value = data.value;
+						}
+					});
+				};
 			
 		} ]);

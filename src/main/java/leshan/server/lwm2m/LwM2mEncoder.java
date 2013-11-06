@@ -10,6 +10,7 @@ import leshan.server.lwm2m.message.server.DeletedResponse;
 import leshan.server.lwm2m.message.server.ErrorResponse;
 import leshan.server.lwm2m.message.server.MessageEncoder;
 import leshan.server.lwm2m.message.server.ReadRequest;
+import leshan.server.lwm2m.message.server.ExecRequest;
 import leshan.server.lwm2m.message.server.WriteRequest;
 import leshan.server.tlv.TlvEncoder;
 
@@ -96,6 +97,44 @@ public class LwM2mEncoder implements MessageEncoder {
         return new CoapMessage(1, MessageType.CONFIRMABLE, CoapCode.GET.getCode(), message.getId(), token,
                 options.toArray(new CoapOption[0]), null);
     }
+    
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CoapMessage encode(ExecRequest message) {
+        List<CoapOption> options = new ArrayList<>();
+        try {
+            // objectId
+            options.add(new CoapOption(CoapOptionType.URI_PATH, Integer.toString(message.getObjectId()).getBytes(
+                    "UTF-8")));
+
+            // objectInstanceId
+            if (message.getObjectInstanceId() == null) {
+                if (message.getResourceId() != null) {
+                    options.add(new CoapOption(CoapOptionType.URI_PATH, "0".getBytes("UTF-8"))); // default instanceId
+                }
+            } else {
+                options.add(new CoapOption(CoapOptionType.URI_PATH, Integer.toString(message.getObjectInstanceId())
+                        .getBytes("UTF-8")));
+            }
+
+            // resourceId
+            if (message.getResourceId() != null) {
+                options.add(new CoapOption(CoapOptionType.URI_PATH, Integer.toString(message.getResourceId()).getBytes(
+                        "UTF-8")));
+            }
+
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
+
+        byte[] token = new byte[] {}; // empty token since a piggy-backed response is expected
+        return new CoapMessage(1, MessageType.CONFIRMABLE, CoapCode.POST.getCode(), message.getId(), token,
+                options.toArray(new CoapOption[0]), null);
+    }
+
 
     /**
      * {@inheritDoc}

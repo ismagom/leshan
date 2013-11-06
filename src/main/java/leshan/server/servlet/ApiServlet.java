@@ -35,6 +35,7 @@ import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.client.ClientResponse;
 import leshan.server.lwm2m.message.client.ContentResponse;
 import leshan.server.lwm2m.message.server.ReadRequest;
+import leshan.server.lwm2m.message.server.ExecRequest;
 import leshan.server.lwm2m.message.server.WriteRequest;
 import leshan.server.lwm2m.session.LwSession;
 import leshan.server.lwm2m.session.SessionRegistry;
@@ -99,10 +100,18 @@ public class ApiServlet extends HttpServlet {
         this.handleRequest(req, resp);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.handleRequest(req, resp);
+    }
+
     private void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String[] path = StringUtils.split(req.getPathInfo(), '/');
-
+        
         if (ArrayUtils.isEmpty(path)) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -146,13 +155,15 @@ public class ApiServlet extends HttpServlet {
                         + requestInfo.endpoint + "'");
                 return;
             }
-
+            System.out.println("received method " + req.getMethod());
             if ("GET".equals(req.getMethod())) {
                 // read
                 this.readRequest(session, requestInfo, resp);
             } else if ("PUT".equals(req.getMethod())) {
                 // write
                 this.writeRequest(session, requestInfo, req, resp);
+            } else if ("POST".equals(req.getMethod())) {
+            	this.postRequest(session, requestInfo, resp);
             }
             return;
 
@@ -226,6 +237,25 @@ public class ApiServlet extends HttpServlet {
         resp.setContentType("application/json");
         resp.getOutputStream().write(json.getBytes());
 
+        resp.setStatus(HttpServletResponse.SC_OK);
+    }
+    
+    private void postRequest(LwSession session, RequestInfo requestInfo, HttpServletResponse resp)
+            throws InterruptedException, ExecutionException, IOException {
+
+        ExecRequest request = new ExecRequest(requestInfo.objectId, requestInfo.objectInstanceId,
+                requestInfo.resourceId);
+        IoFuture<ClientResponse> future = requestFilter.request(session.getIoSession(), request, 5000);
+        // wait for client response
+        ClientResponse lwResponse = future.get();
+
+     // build JSON response
+        Response response = new Response(lwResponse.getCode().toString(), null);
+
+        String json = gson.toJson(response);
+        resp.setContentType("application/json");
+        resp.getOutputStream().write(json.getBytes());
+        System.out.println("\n\n\n Response is " + HttpServletResponse.SC_OK.toString() + "\n\n\n");
         resp.setStatus(HttpServletResponse.SC_OK);
     }
 

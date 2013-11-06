@@ -23,7 +23,9 @@
 		<div ng-repeat="resource in lwresources" class="lw-rsc-div-{{resource.type}}">
 			<h3 class="lw-rsc-title lw-rsc-title-{{resource.type}}" id="{{resource.name}}">{{resource.name}}</h3>
 			<span class="text-muted lw-rsc-path">{{resource.path}}</span>
-			<button ng-if="resource.type == 'resource'" class="btn btn-default btn-xs" ng-click="read('{{resource.path}}', $index)">GET</button>
+			<button ng-if="resource.type == 'resource' && (resource.at == 'read' || resource.at == 'readwrite')" class="btn btn-default btn-xs" ng-click="read('{{resource.path}}', $index)">GET</button>
+			<button ng-if="resource.type == 'resource' && resource.at == 'readwrite'" class="btn btn-default btn-xs" ng-click="write('{{resource.path}}', $index)">WRITE</button>
+			<button ng-if="resource.type == 'resource' && resource.at == 'exec'" class="btn btn-default btn-xs" ng-click="exec('{{resource.path}}', $index)">EXEC</button>			
 			<span class="lw-rsc-value">{{resource.value}}</span>
 		</div>
 		

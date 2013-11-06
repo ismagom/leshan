@@ -15,6 +15,8 @@ public interface MessageEncoder {
 
     CoapMessage encode(ReadRequest message);
 
+    CoapMessage encode(ExecRequest message);
+
     CoapMessage encode(WriteRequest message);
 
 }

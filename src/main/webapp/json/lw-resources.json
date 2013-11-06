@@ -2,21 +2,24 @@
 	{
 		"name":"LWM2M Security",
 		"path":"/0",
-		"type":"object"
+		"type":"object",
+		"at":"read"
 	},
 	
 	
 	{
 		"name":"LWM2M Server",
 		"path":"/1",
-		"type":"object"
+		"type":"object",
+		"at":"read"
 	},
 		
 	
 	{
 		"name":"Access Control",
 		"path":"/2",
-		"type":"object"
+		"type":"object",
+		"at":"read"
 	},
 		
 	
@@ -24,92 +27,99 @@
 	{
 		"name":"Device",
 		"path":"/3",
-		"type":"object"
+		"type":"object",
+		"at":"read"
 	},
 	{
 		"name":"Manufacturer",
 		"path":"/3/0/0",
-		"type":"resource"
+		"type":"resource",
+		"at":"read"
 	},
 	{
 		"name":"Model Number",
 		"path":"/3/0/1",
-		"type":"resource"
+		"type":"resource",
+		"at":"read"
 	},
 	{
 		"name":"Serial Number",
 		"path":"/3/0/2",
-		"type":"resource"
+		"type":"resource",
+		"at":"read"
 	},
 	{
-		"name":"Firmware Version",
-		"path":"/3/0/3",
-		"type":"resource"
+		"name":"LWM2M client version",
+		"path":"/3/0/5",
+		"type":"resource",
+		"at":"read"
+	},
+	{
+		"name":"Firmware version",
+		"path":"/3/0/7",
+		"type":"resource",
+		"at":"read"
 	},
 	{
 		"name":"Reboot",
-		"path":"/3/0/4",
-		"type":"resource"
+		"path":"/3/0/8",
+		"type":"resource",
+		"at":"exec"
 	},
 	{
 		"name":"Factory Reset",
-		"path":"/3/0/5",
-		"type":"resource"
-	},
-	{
-		"name":"Available Power Sources",
-		"path":"/3/0/6",
-		"type":"resource"
-	},
-	{
-		"name":"Power Source Voltage",
-		"path":"/3/0/7",
-		"type":"resource"
-	},
-	{
-		"name":"Power Source Current",
-		"path":"/3/0/8",
-		"type":"resource"
-	},
-	{
-		"name":"Battery Level",
 		"path":"/3/0/9",
-		"type":"resource"
+		"type":"resource",
+		"at":"exec"
 	},
 	{
-		"name":"Memory Free",
+		"name":"Power Source",
 		"path":"/3/0/10",
-		"type":"resource"
+		"type":"resource",
+		"at":"read"
 	},
+	{
+		"name":"Battery level",
+		"path":"/3/0/11",
+		"type":"resource",
+		"at":"read"
+	},
+	{
+		"name":"Memory free",
+		"path":"/3/0/16",
+		"type":"resource",
+		"at":"read"
+	},
+	{
+		"name":"Device state",
+		"path":"/3/0/17",
+		"type":"resource",
+		"at":"read"
+	},
+	
 	{
 		"name":"Error Code",
-		"path":"/3/0/11",
-		"type":"resource"
+		"path":"/3/0/18",
+		"type":"resource",
+		"at":"read"
 	},
 	{
 		"name":"Reset Error Code",
-		"path":"/3/0/12",
-		"type":"resource"
+		"path":"/3/0/19",
+		"type":"resource",
+		"at":"exec"
 	},
 	{
 		"name":"Current Time",
-		"path":"/3/0/13",
-		"type":"resource"
+		"path":"/3/0/20",
+		"type":"resource",
+		"at":"readwrite"
 	},
 	{
-		"name":"UTC Offset",
-		"path":"/3/0/14",
-		"type":"resource"
-	},
-	{
-		"name":"Timezone",
-		"path":"/3/0/15",
-		"type":"resource"
-	},
-	{
-		"name":"Supported Binding and Modes",
-		"path":"/3/0/16",
-		"type":"resource"
+		"name":"Time Zone",
+		"path":"/3/0/21",
+		"type":"resource",
+		"at":"read"
 	},
 
 	
@@ -118,7 +128,8 @@
 	{
 		"name":"Connectivity Monitoring",
 		"path":"/4",
-		"type":"object"
+		"type":"object",
+		"at":"read"
 	},
 	
 	
@@ -126,7 +137,8 @@
 	{
 		"name":"Firmware",
 		"path":"/5",
-		"type":"object"
+		"type":"object",
+		"at":"read"
 	},
 	
 	
@@ -134,7 +146,8 @@
 	{
 		"name":"Location",
 		"path":"/6",
-		"type":"object"
+		"type":"object",
+		"at":"read"
 	},
 	
 	
@@ -142,6 +155,7 @@
 	{
 		"name":"Connectivity Statistics",
 		"path":"/7",
-		"type":"object"
+		"type":"object",
+		"at":"read"
 	}
 ]
