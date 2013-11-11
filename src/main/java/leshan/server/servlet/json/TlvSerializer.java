@@ -28,11 +28,18 @@ public class TlvSerializer implements JsonSerializer<Tlv> {
             case RESOURCE_VALUE:
             case RESOURCE_INSTANCE:
                 // value
-                String value = new String(src.getValue(), "UTF-8");
+            	/* try to parse integer */
+            	String value = new Integer(Integer.parseInt(Hex.encodeHexString(src.getValue()), 16)).toString();                
                 if (StringUtils.isAsciiPrintable(value)) {
                     element.addProperty("value", value);
                 } else {
-                    element.addProperty("value", "[Hex] " + Hex.encodeHexString(src.getValue()));
+                	/* try string */
+                	value = new String(src.getValue(), "UTF-8");
+                	if (StringUtils.isAsciiPrintable(value)) {
+                		element.addProperty("value", value);
+                	} else {
+                        element.addProperty("value", "[Hex] " + Hex.encodeHexString(src.getValue()));                		
+                	}
                 }
                 break;
             case OBJECT_INSTANCE:

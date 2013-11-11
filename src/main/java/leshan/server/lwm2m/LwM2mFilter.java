@@ -54,7 +54,8 @@ public class LwM2mFilter extends AbstractIoFilter {
 
                 byte[] content = null;
                 ContentFormat format = null;
-                if (ResponseCode.CONTENT.equals(code)) {
+                if (ResponseCode.CONTENT.equals(code)
+                		|| ResponseCode.CHANGED.equals(code)) {
                     content = coapMessage.getPayload();
 
                     // coapMessage.getContentFormat()?
@@ -65,7 +66,7 @@ public class LwM2mFilter extends AbstractIoFilter {
                     } else {
                         format = ContentFormat.TLV;
                     }
-                    controller.callReadNextFilter(new ContentResponse(coapMessage.getId(), content, format));
+                    controller.callReadNextFilter(new ContentResponse(coapMessage.getId(), content, format, ResponseCode.CHANGED.equals(code)));
                 } else {
                     controller.callReadNextFilter(new ClientResponse(coapMessage.getId(), code));
                 }
@@ -119,7 +120,6 @@ public class LwM2mFilter extends AbstractIoFilter {
                             break;
                         case PUT:
                             // update
-
                         default:
                             throw new ProtocolDecoderException("register operation non supported : "
                                     + coapMessage.getCode());

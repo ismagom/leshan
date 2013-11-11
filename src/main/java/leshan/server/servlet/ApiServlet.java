@@ -155,10 +155,10 @@ public class ApiServlet extends HttpServlet {
                         + requestInfo.endpoint + "'");
                 return;
             }
-            System.out.println("received method " + req.getMethod());
+
             if ("GET".equals(req.getMethod())) {
-                // read
-                this.readRequest(session, requestInfo, resp);
+            	// read & observe
+        	    this.readRequest(session, requestInfo, resp);            		
             } else if ("PUT".equals(req.getMethod())) {
                 // write
                 this.writeRequest(session, requestInfo, req, resp);
@@ -180,7 +180,7 @@ public class ApiServlet extends HttpServlet {
             throws InterruptedException, ExecutionException, IOException {
 
         ReadRequest request = new ReadRequest(requestInfo.objectId, requestInfo.objectInstanceId,
-                requestInfo.resourceId);
+                requestInfo.resourceId, requestInfo.is_observe);
         IoFuture<ClientResponse> future = requestFilter.request(session.getIoSession(), request, 5000);
         // wait for client response
         ClientResponse lwResponse = future.get();
@@ -217,7 +217,7 @@ public class ApiServlet extends HttpServlet {
             HttpServletResponse resp) throws InterruptedException, ExecutionException, IOException {
 
         WriteRequest request = null;
-        if ("text/plain".equals(req.getContentType())) {
+        if (req.getContentType().contains("text/plain")) {
             String content = IOUtils.toString(req.getInputStream(), "UTF-8");
             request = new WriteRequest(requestInfo.objectId, requestInfo.objectInstanceId, requestInfo.resourceId,
                     ContentFormat.TEXT, content, null);
@@ -255,7 +255,6 @@ public class ApiServlet extends HttpServlet {
         String json = gson.toJson(response);
         resp.setContentType("application/json");
         resp.getOutputStream().write(json.getBytes());
-        System.out.println("\n\n\n Response is " + HttpServletResponse.SC_OK.toString() + "\n\n\n");
         resp.setStatus(HttpServletResponse.SC_OK);
     }
 
@@ -266,13 +265,14 @@ public class ApiServlet extends HttpServlet {
         Integer objectInstanceId;
         Integer resourceId;
         Integer resourceInstanceId;
+        boolean is_observe;
 
         /**
          * Build LW request info from URI path
          */
         RequestInfo(String[] path) {
 
-            if (path.length < 3 || path.length > 6) {
+            if (path.length < 3 || path.length > 7) {
                 throw new IllegalArgumentException("invalid path");
             }
 
@@ -289,6 +289,11 @@ public class ApiServlet extends HttpServlet {
                 }
                 if (path.length > 5) {
                     this.resourceInstanceId = Integer.valueOf(path[5]);
+                }
+                if (path.length > 6) {
+                    this.is_observe = path[6].equals("o");
+                } else {
+                	this.is_observe = false;
                 }
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("invalid path", e);

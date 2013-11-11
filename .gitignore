@@ -11,3 +11,6 @@ target/
 run.sh
 .gitignore
 .gitignore~
+*~
+.buildpath
+.settings

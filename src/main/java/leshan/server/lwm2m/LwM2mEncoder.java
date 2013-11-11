@@ -88,12 +88,24 @@ public class LwM2mEncoder implements MessageEncoder {
                 options.add(new CoapOption(CoapOptionType.URI_PATH, Integer.toString(message.getResourceId()).getBytes(
                         "UTF-8")));
             }
+            
+            // Observe
+            if (message.isObserve()) {
+            	options.add(new CoapOption(CoapOptionType.OBSERVE, "".getBytes()));
+            }
 
         } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException(e);
         }
 
-        byte[] token = new byte[] {}; // empty token since a piggy-backed response is expected
+        // Observe
+        byte[] token;
+        if (message.isObserve()) {
+        	token = new byte[4];
+        } else {
+            token = new byte[] {}; // empty token since a piggy-backed response is expected        	
+        }
+
         return new CoapMessage(1, MessageType.CONFIRMABLE, CoapCode.GET.getCode(), message.getId(), token,
                 options.toArray(new CoapOption[0]), null);
     }

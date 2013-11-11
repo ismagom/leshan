@@ -6,7 +6,6 @@
 		"at":"read"
 	},
 	
-	
 	{
 		"name":"LWM2M Server",
 		"path":"/1",
@@ -21,7 +20,7 @@
 		"type":"object",
 		"at":"read"
 	},
-		
+			
 	
 	
 	{
@@ -30,6 +29,7 @@
 		"type":"object",
 		"at":"read"
 	},
+	
 	{
 		"name":"Manufacturer",
 		"path":"/3/0/0",
@@ -49,81 +49,91 @@
 		"at":"read"
 	},
 	{
-		"name":"LWM2M client version",
-		"path":"/3/0/5",
-		"type":"resource",
-		"at":"read"
-	},
-	{
-		"name":"Firmware version",
-		"path":"/3/0/7",
+		"name":"Firmware Version",
+		"path":"/3/0/3",
 		"type":"resource",
 		"at":"read"
 	},
 	{
 		"name":"Reboot",
-		"path":"/3/0/8",
+		"path":"/3/0/4",
 		"type":"resource",
 		"at":"exec"
 	},
 	{
 		"name":"Factory Reset",
-		"path":"/3/0/9",
+		"path":"/3/0/5",
 		"type":"resource",
 		"at":"exec"
 	},
 	{
-		"name":"Power Source",
+		"name":"Available Power Sources",
+		"path":"/3/0/6",
+		"type":"resource",
+		"at":"read"
+	},
+	
+	{
+		"name":"Power Source Voltage",
+		"path":"/3/0/7",
+		"type":"resource",
+		"at":"read"
+	},
+	{
+		"name":"Power Source Current",
+		"path":"/3/0/8",
+		"type":"resource",
+		"at":"read"
+	},
+	{
+		"name":"Battery Level",
+		"path":"/3/0/9",
+		"type":"resource",
+		"at":"read"
+	},
+	{
+		"name":"Memory Free",
 		"path":"/3/0/10",
 		"type":"resource",
 		"at":"read"
 	},
 	{
-		"name":"Battery level",
+		"name":"Error Code",
 		"path":"/3/0/11",
 		"type":"resource",
 		"at":"read"
 	},
 	{
-		"name":"Memory free",
-		"path":"/3/0/16",
-		"type":"resource",
-		"at":"read"
-	},
-	{
-		"name":"Device state",
-		"path":"/3/0/17",
-		"type":"resource",
-		"at":"read"
-	},
-	
-	{
-		"name":"Error Code",
-		"path":"/3/0/18",
-		"type":"resource",
-		"at":"read"
-	},
-	{
 		"name":"Reset Error Code",
-		"path":"/3/0/19",
+		"path":"/3/0/12",
 		"type":"resource",
 		"at":"exec"
 	},
 	{
 		"name":"Current Time",
-		"path":"/3/0/20",
+		"path":"/3/0/13",
 		"type":"resource",
 		"at":"readwrite"
 	},
 	{
-		"name":"Time Zone",
-		"path":"/3/0/21",
+		"name":"UTC Offset",
+		"path":"/3/0/14",
+		"type":"resource",
+		"at":"readwrite"
+	},
+	{
+		"name":"Timezone",
+		"path":"/3/0/15",
+		"type":"resource",
+		"at":"readwrite"
+	},
+	{
+		"name":"Supported Binding and Modes",
+		"path":"/3/0/16",
 		"type":"resource",
 		"at":"read"
 	},
 
-	
-	
 	
 	{
 		"name":"Connectivity Monitoring",
@@ -153,9 +163,129 @@
 	
 	
 	{
-		"name":"Connectivity Statistics",
+		"name":"Connectivity",
 		"path":"/7",
 		"type":"object",
 		"at":"read"
+	},
+	
+	
+	
+	
+	
+	
+	
+	
+	{
+		"name":"Applications/0",
+		"path":"/10",
+		"type":"object",
+		"at":"read"
+	},
+	{
+		"name":"Name",
+		"path":"/10/0/0",
+		"type":"resource",
+		"at":"readwrite"
+	},
+	{
+		"name":"Version",
+		"path":"/10/0/1",
+		"type":"resource",
+		"at":"readwrite"
+	},
+	{
+		"name":"URL",
+		"path":"/10/0/2",
+		"type":"resource",
+		"at":"readwrite"
+	},
+	{
+		"name":"Download",
+		"path":"/10/0/3",
+		"type":"resource",
+		"at":"exec"
+	},
+	{
+		"name":"Run",
+		"path":"/10/0/4",
+		"type":"resource",
+		"at":"exec"
+	},
+	{
+		"name":"Kill",
+		"path":"/10/0/5",
+		"type":"resource",
+		"at":"exec"
+	},
+	{
+		"name":"State",
+		"path":"/10/0/6",
+		"type":"resource",
+		"at":"read"
+	},
+	{
+		"name":"Error code",
+		"path":"/10/0/7",
+		"type":"resource",
+		"at":"read"
+	},
+	
+		{
+		"name":"Applications/1",
+		"path":"/10",
+		"type":"object",
+		"at":"read"
+	},
+	{
+		"name":"Name",
+		"path":"/10/1/0",
+		"type":"resource",
+		"at":"readwrite"
+	},
+	{
+		"name":"Version",
+		"path":"/10/1/1",
+		"type":"resource",
+		"at":"readwrite"
+	},
+	{
+		"name":"URL",
+		"path":"/10/1/2",
+		"type":"resource",
+		"at":"readwrite"
+	},
+	{
+		"name":"Download",
+		"path":"/10/1/3",
+		"type":"resource",
+		"at":"exec"
+	},
+	{
+		"name":"Run",
+		"path":"/10/1/4",
+		"type":"resource",
+		"at":"exec"
+	},
+	{
+		"name":"Kill",
+		"path":"/10/1/5",
+		"type":"resource",
+		"at":"exec"
+	},
+	{
+		"name":"State",
+		"path":"/10/1/6",
+		"type":"resource",
+		"at":"read"
+	},
+	{
+		"name":"Error code",
+		"path":"/10/1/7",
+		"type":"resource",
+		"at":"read"
 	}
+	
+	
+	
 ]

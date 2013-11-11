@@ -15,14 +15,21 @@ public class ContentResponse extends ClientResponse {
     private final byte[] content;
 
     private final ContentFormat format;
+    
+    private final boolean is_changed;
 
-    public ContentResponse(int id, byte[] content, ContentFormat format) {
+    public ContentResponse(int id, byte[] content, ContentFormat format, boolean is_changed) {
         super(id, ResponseCode.CONTENT);
 
         Validate.notNull(format);
 
         this.content = content;
         this.format = format;
+        this.is_changed = is_changed;
+    }
+    
+    public boolean isChanged() {
+    	return this.is_changed;
     }
 
     public byte[] getContent() {

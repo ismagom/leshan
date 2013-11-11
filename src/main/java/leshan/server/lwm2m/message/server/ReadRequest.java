@@ -36,8 +36,10 @@ public class ReadRequest implements ServerRequest {
     private final Integer objectInstanceId;
 
     private final Integer resourceId;
+    
+    private final boolean is_observe;
 
-    public ReadRequest(Integer objectId, Integer objectInstanceId, Integer resourceId) {
+    public ReadRequest(Integer objectId, Integer objectInstanceId, Integer resourceId, boolean is_observe) {
         Validate.notNull(objectId);
 
         this.id = RandomUtils.nextInt() & 0xFFFF;
@@ -47,6 +49,7 @@ public class ReadRequest implements ServerRequest {
         this.objectId = objectId;
         this.objectInstanceId = objectInstanceId;
         this.resourceId = resourceId;
+        this.is_observe = is_observe;
     }
 
     /**
@@ -55,6 +58,10 @@ public class ReadRequest implements ServerRequest {
     @Override
     public int getId() {
         return id;
+    }
+    
+    public boolean isObserve() {
+    	return is_observe;
     }
 
     /**
