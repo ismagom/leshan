@@ -1,3 +1,13 @@
+This is a fork of https://github.com/jvermillard/leshan
+
+Changes
+======
+
+ * Added WRITE and EXEC operations.
+ * Updated lw-resources.json to support Applications objects for OTA software download and execution control. 
+ * Future plans: add OBSERVE operation
+
+
 Leshan
 ======
 
