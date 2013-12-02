@@ -6,6 +6,9 @@ import leshan.server.lwm2m.session.SessionRegistry;
 import leshan.server.servlet.ApiServlet;
 import leshan.server.servlet.EventServlet;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+
 import org.apache.mina.api.IdleStatus;
 import org.apache.mina.api.IoFilter;
 import org.apache.mina.coap.CoapMessage;
@@ -47,9 +50,12 @@ public class LwM2mServer {
 
         // we kill sessions after 20 minutes of inactivity (default)
         server.getSessionConfig().setIdleTimeInMillis(IdleStatus.READ_IDLE, 20 * 60 * 1_000);
-
+        
         server.setReuseAddress(true);
-        server.bind(port);
+        SocketAddress addr = new InetSocketAddress("0.0.0.0",port);
+       
+        server.bind(addr);
+        //server.bind(port);
 
         LOG.info("LW-M2M server started on port " + port);
 

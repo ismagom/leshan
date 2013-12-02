@@ -207,26 +207,32 @@
 		"at":"exec"
 	},
 	{
-		"name":"Run",
+		"name":"Args",
 		"path":"/10/0/4",
 		"type":"resource",
-		"at":"exec"
+		"at":"readwrite"
 	},
 	{
-		"name":"Kill",
+		"name":"Run",
 		"path":"/10/0/5",
 		"type":"resource",
 		"at":"exec"
 	},
 	{
-		"name":"State",
+		"name":"Kill",
 		"path":"/10/0/6",
+		"type":"resource",
+		"at":"exec"
+	},
+	{
+		"name":"State",
+		"path":"/10/0/7",
 		"type":"resource",
 		"at":"read"
 	},
 	{
 		"name":"Error code",
-		"path":"/10/0/7",
+		"path":"/10/0/8",
 		"type":"resource",
 		"at":"read"
 	},
@@ -262,26 +268,32 @@
 		"at":"exec"
 	},
 	{
-		"name":"Run",
+		"name":"Args",
 		"path":"/10/1/4",
 		"type":"resource",
-		"at":"exec"
+		"at":"readwrite"
 	},
 	{
-		"name":"Kill",
+		"name":"Run",
 		"path":"/10/1/5",
 		"type":"resource",
 		"at":"exec"
 	},
 	{
-		"name":"State",
+		"name":"Kill",
 		"path":"/10/1/6",
+		"type":"resource",
+		"at":"exec"
+	},
+	{
+		"name":"State",
+		"path":"/10/1/7",
 		"type":"resource",
 		"at":"read"
 	},
 	{
 		"name":"Error code",
-		"path":"/10/1/7",
+		"path":"/10/1/8",
 		"type":"resource",
 		"at":"read"
 	}
