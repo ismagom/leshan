@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="lwClientApp">
+<head>
+<meta charset=utf-8>
+<meta name="viewport" content="width=800">
+<title>CTVR Thingscape</title>
+<link rel="stylesheet" href="css/html5demos.css">
+
+<script src="js/h5utils.js"></script>
+</head>
+<body>
+<section id="wrapper">
+    <header>
+      <img src="ctvr-logo.png" alt="CTVR Thingscape">
+    </header>
+
+<style type="text/css">
+a:link {color:#000; text-decoration:none;}    /* unvisited link */
+a:visited {color:#000; text-decoration:none;} /* visited link */
+a:hover {color:#000; text-decoration:underline;}   /* mouse over link */
+a:active {color:#000; text-decoration:underline;}  /* selected link */
+.apps {
+  text-decoration: none;
+  color: #000;
+  margin: 10px;
+  width: 100px;
+  border: 3px dashed #999;
+  background: #eee;
+  padding: 10px;
+  display: inline-block;
+}
+
+#store {
+  background-color: #abc;
+  vertical-align: middle;
+  text-align: center;
+  height: 600px;
+  width: 150px;
+  border: 1px solid #000;
+  padding: 10px;
+}
+
+
+*[draggable=true] {
+  -moz-user-select:none;
+  -khtml-user-drag: element;
+  cursor: move;
+}
+
+
+.bin {
+  background-color: #ccc;
+  vertical-align: middle;
+  text-align: center;
+  height: 60px;
+  width: 80px;
+  border: 3px solid #000;
+  padding: 10px; 
+}
+
+
+#statusbar {
+  background-color: #fff;
+  vertical-align: middle;
+  text-align: center;
+  border: 3px solid #000;
+  padding: 10px; 
+}
+
+</style>
+<article>
+<div id="statusbar" align="center"></div>
+<table>
+<tr>
+<td width="1800">
+ <div id="things">
+ </div>
+</td>
+<td width="200" valign="top">
+  <div id="store"> Pick your App from the Store!
+    <div class="apps" id="0">FlashLights</div>
+    <div class="apps" id="1">LightsApp</div>
+    <div class="apps" id="2">SoundApp</div>
+    <div class="apps" id="3">ProximityApp</div>
+  </div>
+</tr>
+</table>
+</article>
+<script src="js/leshan_man.js"></script>
+</body>
+</html>
