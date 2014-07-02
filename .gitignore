@@ -1,14 +1,10 @@
-*.class
 
 # Package Files #
-*.jar
 *.war
 *.ear
 
 .classpath
 .project
-target/
-run.sh
 .gitignore
 .gitignore~
 *~
