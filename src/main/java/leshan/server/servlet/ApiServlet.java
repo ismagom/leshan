@@ -19,6 +19,7 @@
  */
 package leshan.server.servlet;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -62,242 +63,327 @@ import com.google.gson.GsonBuilder;
  */
 public class ApiServlet extends HttpServlet {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ApiServlet.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ApiServlet.class);
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
+	
+	private int maxTrials = 5;
+	private int timeoutMilisec = 800;
 
-    private final SessionRegistry registry;
+	private final SessionRegistry registry;
 
-    private final LwM2mRequestFilter requestFilter;
+	private final LwM2mRequestFilter requestFilter;
 
-    private final Gson gson;
+	private final Gson gson;
 
-    private final TlvDecoder tlvDecoder = new TlvDecoder();
+	private final TlvDecoder tlvDecoder = new TlvDecoder();
 
-    public ApiServlet(SessionRegistry registry, LwM2mRequestFilter requestFilter) {
-        this.registry = registry;
-        this.requestFilter = requestFilter;
+	public ApiServlet(SessionRegistry registry, LwM2mRequestFilter requestFilter) {
+		this.registry = registry;
+		this.requestFilter = requestFilter;
 
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Tlv.class, new TlvSerializer());
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder.registerTypeAdapter(Tlv.class, new TlvSerializer());
 
-        gson = gsonBuilder.create();
-    }
+		gson = gsonBuilder.create();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.handleRequest(req, resp);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		this.handleRequest(req, resp);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.handleRequest(req, resp);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void doPut(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		this.handleRequest(req, resp);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.handleRequest(req, resp);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		this.handleRequest(req, resp);
+	}
 
-    private void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	private void handleRequest(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
 
-        String[] path = StringUtils.split(req.getPathInfo(), '/');
-        
-        if (ArrayUtils.isEmpty(path)) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
+		String[] path = StringUtils.split(req.getPathInfo(), '/');
 
-        try {
-            if (!("clients".equals(path[0]))) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "not found: '" + req.getPathInfo() + "'");
-                return;
-            }
+		if (ArrayUtils.isEmpty(path)) {
+			resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
 
-            if (path.length == 1 && "GET".equals(req.getMethod())) {
-                // list registered clients
-                List<Client> clients = new ArrayList<>();
-                for (LwSession session : registry.allSessions()) {
-                    clients.add(new Client(session.getEndpoint(), session.getRegistrationId(), session
-                            .getRegistrationDate(), session.getIoSession().getRemoteAddress().toString(), session
-                            .getObjects(), session.getSmsNumber(), session.getLwM2mVersion(), session
-                            .getLifeTimeInSec()));
-                }
+		try {
+			if ("clients".equals(path[0])) {
+				if (path.length == 1 && "GET".equals(req.getMethod())) {
+					// list registered clients
+					List<Client> clients = new ArrayList<>();
+					for (LwSession session : registry.allSessions()) {
+						clients.add(new Client(session.getEndpoint(), session
+								.getRegistrationId(), session
+								.getRegistrationDate(), session.getIoSession()
+								.getRemoteAddress().toString(), session
+								.getObjects(), session.getSmsNumber(), session
+								.getLwM2mVersion(), session.getLifeTimeInSec()));
+					}
 
-                String json = gson.toJson(clients.toArray(new Client[] {}));
-                resp.setContentType("application/json");
-                resp.getOutputStream().write(json.getBytes());
+					String json = gson.toJson(clients.toArray(new Client[] {}));
+					resp.setContentType("application/json");
+					resp.getOutputStream().write(json.getBytes());
 
-                resp.setStatus(HttpServletResponse.SC_OK);
-                return;
-            }
+					resp.setStatus(HttpServletResponse.SC_OK);
+					return;
+				}
 
-            RequestInfo requestInfo;
-            try {
-                requestInfo = new RequestInfo(path);
-            } catch (IllegalArgumentException e) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-                return;
-            }
+				RequestInfo requestInfo;
+				try {
+					requestInfo = new RequestInfo(path);
+				} catch (IllegalArgumentException e) {
+					resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+							e.getMessage());
+					return;
+				}
 
-            LwSession session = registry.getSession(requestInfo.endpoint);
-            if (session == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no registered client with id '"
-                        + requestInfo.endpoint + "'");
-                return;
-            }
+				LwSession session = registry.getSession(requestInfo.endpoint);
+				if (session == null) {
+					resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+							"no registered client with id '"
+									+ requestInfo.endpoint + "'");
+					return;
+				}
 
-            if ("GET".equals(req.getMethod())) {
-            	// read & observe
-        	    this.readRequest(session, requestInfo, resp);            		
-            } else if ("PUT".equals(req.getMethod())) {
-                // write
-                this.writeRequest(session, requestInfo, req, resp);
-            } else if ("POST".equals(req.getMethod())) {
-            	this.postRequest(session, requestInfo, resp);
-            }
-            return;
+				if ("GET".equals(req.getMethod())) {
+					// read & observe
+					this.readRequest(session, requestInfo, resp);
+				} else if ("PUT".equals(req.getMethod())) {
+					// write
+					this.writeRequest(session, requestInfo, req, resp);
+				} else if ("POST".equals(req.getMethod())) {
+					this.postRequest(session, requestInfo, resp);
+				}
 
-        } catch (NotImplementedException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, e.getMessage());
-        } catch (Exception e) {
-            LOG.error("unexpected error", e);
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
+				return;
 
-    }
+			} else if ("apps".equals(path[0])) {
 
-    private void readRequest(LwSession session, RequestInfo requestInfo, HttpServletResponse resp)
-            throws InterruptedException, ExecutionException, IOException {
+				if (path.length == 1 && "GET".equals(req.getMethod())) {
+					File folder = new File("apps_files/");
+					File[] listOfFiles = folder.listFiles();
 
-        ReadRequest request = new ReadRequest(requestInfo.objectId, requestInfo.objectInstanceId,
-                requestInfo.resourceId, requestInfo.is_observe);
-        IoFuture<ClientResponse> future = requestFilter.request(session.getIoSession(), request, 5000);
-        // wait for client response
-        ClientResponse lwResponse = future.get();
+					// list registered clients
+					List<String> apps = new ArrayList<>();
+					for (int i = 0; i < listOfFiles.length; i++) {
+						apps.add(listOfFiles[i].getName());
+					}
 
-        // build JSON read response
-        Object value = null;
-        if (lwResponse instanceof ContentResponse) {
-            ContentResponse cResponse = (ContentResponse) lwResponse;
-            switch (cResponse.getFormat()) {
-            case TLV:
-                value = tlvDecoder.decode(ByteBuffer.wrap(cResponse.getContent()), null);
-                break;
-            case TEXT:
-            case JSON:
-            case LINK:
-                value = new String(cResponse.getContent(), "UTF-8");
-                break;
-            case OPAQUE:
-                value = Hex.encodeHexString(cResponse.getContent());
-                break;
-            }
-        }
+					String json = gson.toJson(apps.toArray(new String[] {}));
+					resp.setContentType("application/json");
+					resp.getOutputStream().write(json.getBytes());
 
-        Response response = new Response(lwResponse.getCode().toString(), value);
+					resp.setStatus(HttpServletResponse.SC_OK);
+					return;
+				}
+			}
 
-        String json = gson.toJson(response);
-        resp.setContentType("application/json");
-        resp.getOutputStream().write(json.getBytes());
+			resp.sendError(HttpServletResponse.SC_NOT_FOUND, "not found: '"
+					+ req.getPathInfo() + "'");
+			return;
 
-        resp.setStatus(HttpServletResponse.SC_OK);
-    }
+		} catch (NotImplementedException e) {
+			resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED,
+					e.getMessage());
+		} catch (Exception e) {
+			LOG.error("unexpected error", e);
+			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
 
-    private void writeRequest(LwSession session, RequestInfo requestInfo, HttpServletRequest req,
-            HttpServletResponse resp) throws InterruptedException, ExecutionException, IOException {
+	}
 
-        WriteRequest request = null;
-        if (req.getContentType().contains("text/plain")) {
-            String content = IOUtils.toString(req.getInputStream(), "UTF-8");
-            request = new WriteRequest(requestInfo.objectId, requestInfo.objectInstanceId, requestInfo.resourceId,
-                    ContentFormat.TEXT, content, null);
-        } else {
-            throw new NotImplementedException("content type " + req.getContentType()
-                    + " not supported for write requests");
-        }
+	private void readRequest(LwSession session, RequestInfo requestInfo,
+			HttpServletResponse resp) throws InterruptedException,
+			ExecutionException, IOException {
 
-        IoFuture<ClientResponse> future = requestFilter.request(session.getIoSession(), request, 5000);
-        // wait for client response
-        ClientResponse lwResponse = future.get();
+		int nofTrials = 0;
+		while (nofTrials < maxTrials) {
+			try {
 
-        // build JSON response
-        Response response = new Response(lwResponse.getCode().toString(), null);
+				ReadRequest request = new ReadRequest(requestInfo.objectId,
+						requestInfo.objectInstanceId, requestInfo.resourceId,
+						requestInfo.is_observe);
+				IoFuture<ClientResponse> future = requestFilter.request(
+						session.getIoSession(), request, timeoutMilisec);
+				// wait for client response
+				ClientResponse lwResponse = future.get();
 
-        String json = gson.toJson(response);
-        resp.setContentType("application/json");
-        resp.getOutputStream().write(json.getBytes());
+				// build JSON read response
+				Object value = null;
+				if (lwResponse instanceof ContentResponse) {
+					ContentResponse cResponse = (ContentResponse) lwResponse;
+					switch (cResponse.getFormat()) {
+					case TLV:
+						value = tlvDecoder.decode(
+								ByteBuffer.wrap(cResponse.getContent()), null);
+						break;
+					case TEXT:
+					case JSON:
+					case LINK:
+						value = new String(cResponse.getContent(), "UTF-8");
+						break;
+					case OPAQUE:
+						value = Hex.encodeHexString(cResponse.getContent());
+						break;
+					}
+				}
 
-        resp.setStatus(HttpServletResponse.SC_OK);
-    }
-    
-    private void postRequest(LwSession session, RequestInfo requestInfo, HttpServletResponse resp)
-            throws InterruptedException, ExecutionException, IOException {
+				Response response = new Response(lwResponse.getCode()
+						.toString(), value);
 
-        ExecRequest request = new ExecRequest(requestInfo.objectId, requestInfo.objectInstanceId,
-                requestInfo.resourceId);
-        IoFuture<ClientResponse> future = requestFilter.request(session.getIoSession(), request, 5000);
-        // wait for client response
-        ClientResponse lwResponse = future.get();
+				String json = gson.toJson(response);
+				resp.setContentType("application/json");
+				resp.getOutputStream().write(json.getBytes());
+				registry.getSession(requestInfo.endpoint).resetError();
+				resp.setStatus(HttpServletResponse.SC_OK);
+				return;
+			} catch (Exception e) {
+				nofTrials++;
+			}
+		}
+		if (registry.getSession(requestInfo.endpoint).addError()) {
+			registry.remove(registry.getSession(requestInfo.endpoint));			
+		}
+		LOG.error("Connection error");
+		resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	}
 
-     // build JSON response
-        Response response = new Response(lwResponse.getCode().toString(), null);
+	private void writeRequest(LwSession session, RequestInfo requestInfo,
+			HttpServletRequest req, HttpServletResponse resp)
+			throws InterruptedException, ExecutionException, IOException {
 
-        String json = gson.toJson(response);
-        resp.setContentType("application/json");
-        resp.getOutputStream().write(json.getBytes());
-        resp.setStatus(HttpServletResponse.SC_OK);
-    }
+		int nofTrials = 0;
+		while (nofTrials < maxTrials) {
+			try {
 
-    class RequestInfo {
+				WriteRequest request = null;
+				if (req.getContentType().contains("text/plain")) {
+					String content = IOUtils.toString(req.getInputStream(),
+							"UTF-8");
+					request = new WriteRequest(requestInfo.objectId,
+							requestInfo.objectInstanceId,
+							requestInfo.resourceId, ContentFormat.TEXT,
+							content, null);
+				} else {
+					throw new NotImplementedException("content type "
+							+ req.getContentType()
+							+ " not supported for write requests");
+				}
 
-        String endpoint;
-        Integer objectId;
-        Integer objectInstanceId;
-        Integer resourceId;
-        Integer resourceInstanceId;
-        boolean is_observe;
+				IoFuture<ClientResponse> future = requestFilter.request(
+						session.getIoSession(), request, timeoutMilisec);
+				// wait for client response
+				ClientResponse lwResponse = future.get();
 
-        /**
-         * Build LW request info from URI path
-         */
-        RequestInfo(String[] path) {
+				// build JSON response
+				Response response = new Response(lwResponse.getCode()
+						.toString(), null);
 
-            if (path.length < 3 || path.length > 7) {
-                throw new IllegalArgumentException("invalid path");
-            }
+				String json = gson.toJson(response);
+				resp.setContentType("application/json");
+				resp.getOutputStream().write(json.getBytes());
 
-            this.endpoint = path[1];
+				resp.setStatus(HttpServletResponse.SC_OK);
+				return;
+			} catch (Exception e) {
+				nofTrials++;
+			}
+		}
+		LOG.error("Connection error");
+		resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	}
 
-            try {
-                this.objectId = Integer.valueOf(path[2]);
+	private void postRequest(LwSession session, RequestInfo requestInfo,
+			HttpServletResponse resp) throws InterruptedException,
+			ExecutionException, IOException {
 
-                if (path.length > 3) {
-                    this.objectInstanceId = Integer.valueOf(path[3]);
-                }
-                if (path.length > 4) {
-                    this.resourceId = Integer.valueOf(path[4]);
-                }
-                if (path.length > 5) {
-                    this.resourceInstanceId = Integer.valueOf(path[5]);
-                }
-                if (path.length > 6) {
-                    this.is_observe = path[6].equals("o");
-                } else {
-                	this.is_observe = false;
-                }
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("invalid path", e);
-            }
-        }
-    }
+		ExecRequest request = new ExecRequest(requestInfo.objectId,
+				requestInfo.objectInstanceId, requestInfo.resourceId);
+
+		int nofTrials = 0;
+		while (nofTrials < maxTrials) {
+			try {
+				IoFuture<ClientResponse> future = requestFilter.request(
+						session.getIoSession(), request, timeoutMilisec);
+				// wait for client response
+				ClientResponse lwResponse = future.get();
+
+				// build JSON response
+				Response response = new Response(lwResponse.getCode()
+						.toString(), null);
+
+				String json = gson.toJson(response);
+				resp.setContentType("application/json");
+				resp.getOutputStream().write(json.getBytes());
+				resp.setStatus(HttpServletResponse.SC_OK);
+				return;
+			} catch (Exception e) {
+				nofTrials++;
+			}
+		}
+		LOG.error("Connection error");
+		resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	}
+
+	class RequestInfo {
+
+		String endpoint;
+		Integer objectId;
+		Integer objectInstanceId;
+		Integer resourceId;
+		Integer resourceInstanceId;
+		boolean is_observe;
+
+		/**
+		 * Build LW request info from URI path
+		 */
+		RequestInfo(String[] path) {
+
+			if (path.length < 3 || path.length > 7) {
+				throw new IllegalArgumentException("invalid path");
+			}
+
+			this.endpoint = path[1];
+
+			try {
+				this.objectId = Integer.valueOf(path[2]);
+
+				if (path.length > 3) {
+					this.objectInstanceId = Integer.valueOf(path[3]);
+				}
+				if (path.length > 4) {
+					this.resourceId = Integer.valueOf(path[4]);
+				}
+				if (path.length > 5) {
+					this.resourceInstanceId = Integer.valueOf(path[5]);
+				}
+				if (path.length > 6) {
+					this.is_observe = path[6].equals("o");
+				} else {
+					this.is_observe = false;
+				}
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("invalid path", e);
+			}
+		}
+	}
 }

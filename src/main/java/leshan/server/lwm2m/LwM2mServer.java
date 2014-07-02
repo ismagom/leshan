@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import leshan.server.lwm2m.session.SessionRegistry;
 import leshan.server.servlet.ApiServlet;
 import leshan.server.servlet.EventServlet;
+import leshan.server.servlet.UploadDownloadFileServlet;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -34,6 +35,8 @@ public class LwM2mServer {
     private SessionRegistry registry = new SessionRegistry();
 
     public void start() {
+    	
+    	
         server = new BioUdpServer();
 
         // protocol filters
@@ -80,8 +83,14 @@ public class LwM2mServer {
 
         server.setHandler(root);
 
-        ServletHolder eventServletHolder = new ServletHolder(new EventServlet(registry));
+        EventServlet eventServlet = new EventServlet(registry);
+        ServletHolder eventServletHolder = new ServletHolder(eventServlet);
         root.addServlet(eventServletHolder, "/event/*");
+
+        server.setHandler(root);
+
+        ServletHolder appsServletHolder = new ServletHolder(new UploadDownloadFileServlet(eventServlet));
+        root.addServlet(appsServletHolder, "/apps/*");
 
         server.setHandler(root);
 

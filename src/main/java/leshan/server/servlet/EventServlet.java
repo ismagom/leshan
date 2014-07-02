@@ -59,12 +59,30 @@ public class EventServlet extends HttpServlet {
     private static final byte[] TERMINATION = new byte[] { '\r', '\n' };
 
     public EventServlet(SessionRegistry registry) {
-        registry.addListener(listener);
-
+        registry.addListener(listener);        
     }
 
     private Set<Continuation> continuations = new ConcurrentHashSet<>();
 
+    public void newAppUploaded(String name) {
+    	for (Continuation c : continuations) {            
+            try {
+                OutputStream output = c.getServletResponse().getOutputStream();
+                output.write(EVENT);
+                output.write("NEWAPP".getBytes());
+                output.write(TERMINATION);
+                output.write(DATA);
+                output.write(gson.toJson(name).getBytes());
+                output.write(TERMINATION);
+                output.write(TERMINATION);
+                output.flush();
+                c.getServletResponse().flushBuffer();
+            } catch (IOException e) {
+                LOG.error("IOException", e);
+            }
+        }
+    }
+    
     private RegistryListener listener = new RegistryListener() {
 
         @Override

@@ -45,6 +45,10 @@ public class LwSession {
     private String smsNumber;
 
     private String lwM2mVersion;
+    
+    private int nof_errors = 0;
+    
+    private static int DISCONNECT_NOF_ERRORS = 7;
 
     public LwSession(IoSession ioSession) {
         this.ioSession = ioSession;
@@ -121,6 +125,20 @@ public class LwSession {
 
     public void setRegistrationDate(Date registrationDate) {
         this.registrationDate = registrationDate;
+    }
+    
+    public void resetError() {
+    	this.nof_errors = 0;
+    }
+    
+    public boolean addError() {
+    	this.nof_errors++;
+    	if (this.nof_errors == DISCONNECT_NOF_ERRORS) {
+    		this.nof_errors = 0;
+    		return true; 
+    	} else {
+    		return false;
+    	}
     }
 
 }
